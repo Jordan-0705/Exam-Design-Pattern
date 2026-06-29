@@ -10,11 +10,13 @@ com\badwallet\model\Wallet.class
 com\badwallet\client\PaymentServiceClient$2.class
 com\badwallet\dto\WalletRequest.class
 com\badwallet\repository\TransactionRepository.class
+com\badwallet\config\CorsConfig.class
 com\badwallet\dto\WithdrawRequest.class
 com\badwallet\client\PaymentServiceClient$1.class
 com\badwallet\dto\BillPaymentRequest.class
 com\badwallet\model\TransactionType.class
 com\badwallet\controller\WalletController.class
 com\badwallet\repository\WalletRepository.class
+com\badwallet\config\CorsConfig$1.class
 com\badwallet\dto\DepositRequest.class
 com\badwallet\config\DataInitializer.class
