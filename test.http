@@ -1,2 +1,14 @@
 ### 1.1 Seeder la base de données
 POST http://localhost:8080/api/wallets/seed?numWallets=10&eventsPerWallet=100
+
+### 1.2 Créer un nouveau portefeuille
+POST http://localhost:8080/api/wallets
+Content-Type: application/json
+
+{
+  "phoneNumber": "+221779998877",
+  "email": "testclient@gmail.com",
+  "initialBalance": 25000,
+  "code": "WLT-TEST001",
+  "currency": "XOF"
+}
