@@ -68,4 +68,19 @@ public class WalletController {
                                     @RequestParam(defaultValue = "10") int size) {
         return walletRepository.findAll(PageRequest.of(page, size));
     }
+
+    // 1.4 Consulter un portefeuille par numéro de téléphone
+    @GetMapping("/{phoneNumber}")
+    public Wallet getWallet(@PathVariable String phoneNumber) {
+        return walletRepository.findByPhoneNumber(phoneNumber)
+            .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé avec ce numéro de téléphone"));
+    }
+
+    // 1.5 Consulter uniquement le solde à jour
+    @GetMapping("/{phoneNumber}/balance")
+    public BigDecimal getBalance(@PathVariable String phoneNumber) {
+        Wallet wallet = walletRepository.findByPhoneNumber(phoneNumber)
+            .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé avec ce numéro de téléphone"));
+        return wallet.getBalance();
+    }
 }
