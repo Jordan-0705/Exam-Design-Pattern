@@ -1,0 +1,4 @@
+com\badwallet\BadwalletApiApplication.class
+com\badwallet\model\Wallet.class
+com\badwallet\controller\WalletController.class
+com\badwallet\repository\WalletRepository.class

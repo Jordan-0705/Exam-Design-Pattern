@@ -8,6 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+
 @RestController
 @RequestMapping("/api/wallets")
 public class WalletController {
@@ -58,5 +61,11 @@ public class WalletController {
         wallet.setCreatedAt(LocalDateTime.now());
         
         return walletRepository.save(wallet);
+    }
+
+    @GetMapping
+    public Page<Wallet> listWallets(@RequestParam(defaultValue = "0") int page,
+                                    @RequestParam(defaultValue = "10") int size) {
+        return walletRepository.findAll(PageRequest.of(page, size));
     }
 }
