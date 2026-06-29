@@ -1,0 +1,7 @@
+com\payment\model\FactureStatus.class
+com\payment\model\Facture.class
+com\payment\PaymentServiceApplication.class
+com\payment\repository\FactureRepository.class
+com\payment\controller\PayFactureRequest.class
+com\payment\controller\FactureController.class
+com\payment\service\FactureService.class
