@@ -1,0 +1,2 @@
+### 1.1 Seeder la base de données
+POST http://localhost:8080/api/wallets/seed?numWallets=10&eventsPerWallet=100
