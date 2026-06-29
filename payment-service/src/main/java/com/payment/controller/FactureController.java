@@ -47,6 +47,20 @@ public class FactureController {
         factureService.payFacture(request.getFactureReference());
         return "Facture " + request.getFactureReference() + " payée avec succès";
     }
+
+    // Seeding automatique pour tous les wallets (endpoint externe)
+    @PostMapping("/seed-all")
+    public String seedAll() {
+        // Récupérer tous les wallets depuis badwallet-api
+        // Ou utiliser une liste prédéfinie
+        List<String> walletCodes = List.of(
+            "WLT-0000001", "WLT-0000002", "WLT-0000003",
+            "WLT-0000004", "WLT-0000005", "WLT-0000006",
+            "WLT-0000007", "WLT-0000008", "WLT-0000009", "WLT-0000010"
+        );
+        factureService.generateMonthlyBills(walletCodes);
+        return "Factures générées pour tous les wallets";
+    }
 }
 
 class PayFactureRequest {

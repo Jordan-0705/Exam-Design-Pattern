@@ -58,3 +58,44 @@ Content-Type: application/json
 
 ### 1.11 Consulter l'historique des transactions
 GET http://localhost:8080/api/wallets/+221770000001/transactions
+
+### Payment Service - Seeding avec plus de mois
+POST http://localhost:8081/api/factures/seed
+Content-Type: application/json
+
+["WLT-0000001", "WLT-0000002", "WLT-0000003", "WLT-0000004", "WLT-0000005"]
+
+### Payment Service - Voir toutes les factures impayées
+GET http://localhost:8081/api/factures/unpaid/WLT-0000001
+
+### 1.9 Payer une facture du mois en cours
+POST http://localhost:8080/api/wallets/pay
+Content-Type: application/json
+
+{
+  "phoneNumber": "+221770000001",
+  "serviceName": "ISM",
+  "amount": 50000.00
+}
+
+### 1.10 Payer des factures spécifiques
+POST http://localhost:8080/api/wallets/pay-factures
+Content-Type: application/json
+
+{
+  "phoneNumber": "+221770000001",
+  "serviceName": "ISM",
+  "factureReferences": ["FAC-ISM-0000001-5-2026", "FAC-ISM-0000001-4-2026"]
+}
+
+### 2.2 Consulter les factures impayées du mois en cours
+GET http://localhost:8080/api/external/factures/WLT-0000001/current
+
+### 2.3 Consulter les factures impayées filtrées
+GET http://localhost:8080/api/external/factures/WLT-0000001/current?unite=ISM
+
+### 2.4 Consulter les factures sur une période
+GET http://localhost:8080/api/external/factures/WLT-0000001/periode?debut=2026-01-01&fin=2026-06-30
+
+### Voir toutes les factures pour un wallet
+GET http://localhost:8081/api/factures/unpaid/WLT-0000001

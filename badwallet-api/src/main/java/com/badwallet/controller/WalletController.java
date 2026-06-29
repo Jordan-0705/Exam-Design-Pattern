@@ -17,9 +17,17 @@ import com.badwallet.model.TransactionType;
 import com.badwallet.model.TransactionStatus;
 import com.badwallet.repository.TransactionRepository;
 import com.badwallet.dto.DepositRequest;
-
+import com.badwallet.dto.FactureDTO;
 import com.badwallet.dto.WithdrawRequest;
 import com.badwallet.dto.TransferRequest;
+
+import com.badwallet.client.PaymentServiceClient;
+import com.badwallet.dto.BillPaymentRequest;
+import com.badwallet.dto.SpecificBillPaymentRequest;
+import java.util.ArrayList;
+//import com.badwallet.dto.FactureDTO;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/api/wallets")
@@ -27,10 +35,14 @@ public class WalletController {
 
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
+    private final PaymentServiceClient paymentServiceClient;
 
-    public WalletController(WalletRepository walletRepository, TransactionRepository transactionRepository) {
+    public WalletController(WalletRepository walletRepository, 
+                            TransactionRepository transactionRepository,
+                            PaymentServiceClient paymentServiceClient) {
         this.walletRepository = walletRepository;
         this.transactionRepository = transactionRepository;
+        this.paymentServiceClient = paymentServiceClient;
     }
 
     // 1.1 Seeder la base de données
@@ -194,5 +206,104 @@ public class WalletController {
         Wallet wallet = walletRepository.findByPhoneNumber(phoneNumber)
             .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé"));
         return transactionRepository.findByWalletOrderByCreatedAtDesc(wallet);
+    }
+
+    // 1.9 Payer une facture du mois en cours
+    @PostMapping("/pay")
+    public String payCurrentBill(@RequestBody BillPaymentRequest request) {
+        Wallet wallet = walletRepository.findByPhoneNumber(request.getPhoneNumber())
+            .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé"));
+        
+        List<FactureDTO> factures = paymentServiceClient.getUnpaidFactures(wallet.getCode());
+        
+        String currentMonth = String.valueOf(LocalDate.now().getMonthValue());
+        String currentYear = String.valueOf(LocalDate.now().getYear());
+        
+        for (FactureDTO facture : factures) {
+            String provider = facture.getProvider();
+            String reference = facture.getReference();
+            BigDecimal amount = facture.getAmount();
+            
+            // Vérifier si la référence correspond au mois et année en cours
+            // On cherche la présence de "-5-2026" dans la référence
+            if (provider.equals(request.getServiceName()) && 
+                reference.contains("-" + currentMonth + "-" + currentYear)) {
+                
+                if (wallet.getBalance().compareTo(amount) < 0) {
+                    throw new RuntimeException("Solde insuffisant pour payer la facture de " + amount + " CFA");
+                }
+                
+                // Payer la facture
+                paymentServiceClient.payFacture(reference);
+                
+                // Débiter le wallet
+                wallet.setBalance(wallet.getBalance().subtract(amount));
+                walletRepository.save(wallet);
+                
+                // Créer la transaction
+                Transaction transaction = new Transaction();
+                transaction.setWallet(wallet);
+                transaction.setType(TransactionType.PAYMENT);
+                transaction.setAmount(amount.negate());
+                transaction.setFee(BigDecimal.ZERO);
+                transaction.setReference("PAY-" + System.currentTimeMillis());
+                transaction.setDescription("Paiement " + provider + " - " + reference);
+                transaction.setStatus(TransactionStatus.COMPLETED);
+                transaction.setCreatedAt(LocalDateTime.now());
+                transactionRepository.save(transaction);
+                
+                return "Facture " + reference + " payée avec succès";
+            }
+        }
+        
+        return "Aucune facture impayée trouvée pour " + request.getServiceName() + 
+            " au mois " + currentMonth + "/" + currentYear;
+    }
+
+    // 1.10 Payer des factures spécifiques
+    @PostMapping("/pay-factures")
+    public String paySpecificBills(@RequestBody SpecificBillPaymentRequest request) {
+        Wallet wallet = walletRepository.findByPhoneNumber(request.getPhoneNumber())
+            .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé"));
+        
+        BigDecimal totalAmount = BigDecimal.ZERO;
+        List<String> paidReferences = new ArrayList<>();
+        List<FactureDTO> factures = paymentServiceClient.getUnpaidFactures(wallet.getCode());
+        
+        for (String reference : request.getFactureReferences()) {
+            for (FactureDTO facture : factures) {
+                String ref = facture.getReference();
+                if (ref.equals(reference)) {
+                    BigDecimal amount = facture.getAmount();
+                    totalAmount = totalAmount.add(amount);
+                    paidReferences.add(reference);
+                    break;
+                }
+            }
+        }
+        
+        if (wallet.getBalance().compareTo(totalAmount) < 0) {
+            throw new RuntimeException("Solde insuffisant");
+        }
+        
+        for (String reference : paidReferences) {
+            paymentServiceClient.payFacture(reference);
+        }
+        
+        wallet.setBalance(wallet.getBalance().subtract(totalAmount));
+        walletRepository.save(wallet);
+        
+        Transaction transaction = new Transaction();
+        transaction.setWallet(wallet);
+        transaction.setType(TransactionType.PAYMENT);
+        transaction.setAmount(totalAmount.negate());
+        transaction.setFee(BigDecimal.ZERO);
+        transaction.setReference("PAY-M-" + System.currentTimeMillis());
+        transaction.setDescription("Paiement de " + paidReferences.size() + " factures");
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setCreatedAt(LocalDateTime.now());
+        transactionRepository.save(transaction);
+        
+        return paidReferences.size() + " factures payées avec succès";
     }
 }

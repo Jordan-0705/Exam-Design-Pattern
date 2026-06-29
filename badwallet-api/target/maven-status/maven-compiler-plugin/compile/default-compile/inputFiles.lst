@@ -2,12 +2,17 @@ C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\s
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\dto\DepositRequest.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\model\Transaction.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\controller\WalletController.java
+C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\client\PaymentServiceClient.java
+C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\dto\FactureDTO.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\BadwalletApiApplication.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\repository\TransactionRepository.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\model\TransactionType.java
+C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\dto\SpecificBillPaymentRequest.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\dto\WalletRequest.java
+C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\controller\ExternalController.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\model\TransactionStatus.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\model\Wallet.java
+C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\dto\BillPaymentRequest.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\repository\WalletRepository.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\dto\WithdrawRequest.java
 C:\Users\DELL\Desktop\Exam S6\Design Pattern\Exam-Design-Pattern\badwallet-api\src\main\java\com\badwallet\config\DataInitializer.java
