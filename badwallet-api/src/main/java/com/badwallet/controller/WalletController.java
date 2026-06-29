@@ -7,18 +7,30 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+
+import com.badwallet.model.Transaction;
+import com.badwallet.model.TransactionType;
+import com.badwallet.model.TransactionStatus;
+import com.badwallet.repository.TransactionRepository;
+import com.badwallet.dto.DepositRequest;
+
+import com.badwallet.dto.WithdrawRequest;
+import com.badwallet.dto.TransferRequest;
 
 @RestController
 @RequestMapping("/api/wallets")
 public class WalletController {
 
     private final WalletRepository walletRepository;
+    private final TransactionRepository transactionRepository;
 
-    public WalletController(WalletRepository walletRepository) {
+    public WalletController(WalletRepository walletRepository, TransactionRepository transactionRepository) {
         this.walletRepository = walletRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     // 1.1 Seeder la base de données
@@ -82,5 +94,105 @@ public class WalletController {
         Wallet wallet = walletRepository.findByPhoneNumber(phoneNumber)
             .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé avec ce numéro de téléphone"));
         return wallet.getBalance();
+    }
+
+    // 1.6 Effectuer un Dépôt
+    @PostMapping("/{walletId}/deposit")
+    public Transaction deposit(@PathVariable Long walletId, @RequestBody DepositRequest request) {
+        Wallet wallet = walletRepository.findById(walletId)
+            .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé"));
+        
+        // Créer la transaction
+        Transaction transaction = new Transaction();
+        transaction.setWallet(wallet);
+        transaction.setType(TransactionType.DEPOSIT);
+        transaction.setAmount(request.getAmount());
+        transaction.setFee(BigDecimal.ZERO);
+        transaction.setReference("DEP-" + System.currentTimeMillis());
+        transaction.setDescription("Dépôt par " + request.getPaymentMethod());
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setCreatedAt(LocalDateTime.now());
+        
+        // Mettre à jour le solde
+        wallet.setBalance(wallet.getBalance().add(request.getAmount()));
+        walletRepository.save(wallet);
+        
+        return transactionRepository.save(transaction);
+    }
+
+    // 1.7 Effectuer un Retrait (frais de 1% du montant plafonnés à 5000 CFA)
+    @PostMapping("/withdraw")
+    public Transaction withdraw(@RequestBody WithdrawRequest request) {
+        Wallet wallet = walletRepository.findByPhoneNumber(request.getPhoneNumber())
+            .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé"));
+        
+        // Calcul des frais (1% du montant, plafonné à 5000 CFA)
+        BigDecimal fee = request.getAmount().multiply(new BigDecimal("0.01"));
+        BigDecimal maxFee = new BigDecimal("5000");
+        BigDecimal finalFee = fee.min(maxFee);
+        BigDecimal totalDeduction = request.getAmount().add(finalFee);
+        
+        // Vérifier le solde suffisant
+        if (wallet.getBalance().compareTo(totalDeduction) < 0) {
+            throw new RuntimeException("Solde insuffisant");
+        }
+        
+        // Créer la transaction
+        Transaction transaction = new Transaction();
+        transaction.setWallet(wallet);
+        transaction.setType(TransactionType.WITHDRAWAL);
+        transaction.setAmount(request.getAmount());
+        transaction.setFee(finalFee);
+        transaction.setReference("WTH-" + System.currentTimeMillis());
+        transaction.setDescription("Retrait de " + request.getAmount() + " CFA (frais: " + finalFee + " CFA)");
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setCreatedAt(LocalDateTime.now());
+        
+        // Mettre à jour le solde
+        wallet.setBalance(wallet.getBalance().subtract(totalDeduction));
+        walletRepository.save(wallet);
+        
+        return transactionRepository.save(transaction);
+    }
+
+    // 1.8 Effectuer un Transfert entre deux portefeuilles
+    @PostMapping("/transfer")
+    public Transaction transfer(@RequestBody TransferRequest request) {
+        Wallet sender = walletRepository.findByPhoneNumber(request.getSenderPhone())
+            .orElseThrow(() -> new RuntimeException("Émetteur non trouvé"));
+        Wallet receiver = walletRepository.findByPhoneNumber(request.getReceiverPhone())
+            .orElseThrow(() -> new RuntimeException("Receveur non trouvé"));
+        
+        // Vérifier le solde de l'émetteur
+        if (sender.getBalance().compareTo(request.getAmount()) < 0) {
+            throw new RuntimeException("Solde insuffisant");
+        }
+        
+        // Mettre à jour les soldes
+        sender.setBalance(sender.getBalance().subtract(request.getAmount()));
+        receiver.setBalance(receiver.getBalance().add(request.getAmount()));
+        walletRepository.save(sender);
+        walletRepository.save(receiver);
+        
+        // Créer la transaction pour l'émetteur
+        Transaction transaction = new Transaction();
+        transaction.setWallet(sender);
+        transaction.setType(TransactionType.TRANSFER);
+        transaction.setAmount(request.getAmount().negate());
+        transaction.setFee(BigDecimal.ZERO);
+        transaction.setReference("TRF-" + System.currentTimeMillis());
+        transaction.setDescription("Transfert vers " + receiver.getPhoneNumber());
+        transaction.setStatus(TransactionStatus.COMPLETED);
+        transaction.setCreatedAt(LocalDateTime.now());
+        
+        return transactionRepository.save(transaction);
+    }
+
+    // 1.11 Consulter l'historique des transactions par téléphone
+    @GetMapping("/{phoneNumber}/transactions")
+    public List<Transaction> getTransactionHistory(@PathVariable String phoneNumber) {
+        Wallet wallet = walletRepository.findByPhoneNumber(phoneNumber)
+            .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé"));
+        return transactionRepository.findByWalletOrderByCreatedAtDesc(wallet);
     }
 }

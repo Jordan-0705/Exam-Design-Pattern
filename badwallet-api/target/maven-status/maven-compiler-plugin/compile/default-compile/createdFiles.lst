@@ -1,4 +1,10 @@
+com\badwallet\model\TransactionStatus.class
+com\badwallet\model\Transaction.class
 com\badwallet\BadwalletApiApplication.class
 com\badwallet\model\Wallet.class
+com\badwallet\dto\WalletRequest.class
+com\badwallet\repository\TransactionRepository.class
+com\badwallet\model\TransactionType.class
 com\badwallet\controller\WalletController.class
 com\badwallet\repository\WalletRepository.class
+com\badwallet\dto\DepositRequest.class

@@ -27,3 +27,34 @@ GET http://localhost:8080/api/wallets/+221770000003
 
 ### 1.5 Consulter uniquement le solde à jour
 GET http://localhost:8080/api/wallets/+221770000003/balance
+
+### 1.6 Effectuer un Dépôt
+POST http://localhost:8080/api/wallets/1/deposit
+Content-Type: application/json
+
+{
+  "amount": 50000.00,
+  "paymentMethod": "CREDIT_CARD"
+}
+
+### 1.7 Effectuer un Retrait
+POST http://localhost:8080/api/wallets/withdraw
+Content-Type: application/json
+
+{
+  "phoneNumber": "+221770000001",
+  "amount": 10000.00
+}
+
+### 1.8 Effectuer un Transfert
+POST http://localhost:8080/api/wallets/transfer
+Content-Type: application/json
+
+{
+  "senderPhone": "+221770000001",
+  "receiverPhone": "+221770000002",
+  "amount": 2000.00
+}
+
+### 1.11 Consulter l'historique des transactions
+GET http://localhost:8080/api/wallets/+221770000001/transactions
