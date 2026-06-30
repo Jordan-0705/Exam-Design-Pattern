@@ -1,3 +1,5 @@
+// badwallet-api/src/main/java/com/badwallet/config/CorsConfig.java
+
 package com.badwallet.config;
 
 import org.springframework.context.annotation.Bean;
@@ -14,15 +16,10 @@ public class CorsConfig {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
                 registry.addMapping("/**")
-                        .allowedOrigins(
-                            "http://localhost:4200",
-                            "http://localhost:36263",
-                            "http://localhost:3000",
-                            "http://localhost:*"    
-                        )
+                        .allowedOrigins("*")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
-                        .allowCredentials(true);
+                        .allowCredentials(false);
             }
         };
     }

@@ -5,6 +5,7 @@ com\badwallet\model\TransactionStatus.class
 com\badwallet\controller\ExternalController.class
 com\badwallet\model\Transaction.class
 com\badwallet\client\PaymentServiceClient.class
+com\badwallet\dto\FactureDTO.class
 com\badwallet\BadwalletApiApplication.class
 com\badwallet\model\Wallet.class
 com\badwallet\client\PaymentServiceClient$2.class
