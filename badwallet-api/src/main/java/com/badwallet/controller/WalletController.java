@@ -171,11 +171,10 @@ public class WalletController {
     @PostMapping("/transfer")
     public Transaction transfer(@RequestBody TransferRequest request) {
         Wallet sender = walletRepository.findByPhoneNumber(request.getSenderPhone())
-            .orElseThrow(() -> new RuntimeException("Émetteur non trouvé"));
+            .orElseThrow(() -> new RuntimeException("Emetteur non trouve"));
         Wallet receiver = walletRepository.findByPhoneNumber(request.getReceiverPhone())
-            .orElseThrow(() -> new RuntimeException("Receveur non trouvé"));
+            .orElseThrow(() -> new RuntimeException("Receveur non trouve"));
         
-        // Vérifier le solde de l'émetteur
         if (sender.getBalance().compareTo(request.getAmount()) < 0) {
             throw new RuntimeException("Solde insuffisant");
         }
@@ -186,9 +185,9 @@ public class WalletController {
         walletRepository.save(sender);
         walletRepository.save(receiver);
         
-        // Créer la transaction pour l'émetteur
         Transaction transaction = new Transaction();
         transaction.setWallet(sender);
+        transaction.setReceiverWallet(receiver);
         transaction.setType(TransactionType.TRANSFER);
         transaction.setAmount(request.getAmount().negate());
         transaction.setFee(BigDecimal.ZERO);
@@ -204,8 +203,9 @@ public class WalletController {
     @GetMapping("/{phoneNumber}/transactions")
     public List<Transaction> getTransactionHistory(@PathVariable String phoneNumber) {
         Wallet wallet = walletRepository.findByPhoneNumber(phoneNumber)
-            .orElseThrow(() -> new RuntimeException("Portefeuille non trouvé"));
-        return transactionRepository.findByWalletOrderByCreatedAtDesc(wallet);
+            .orElseThrow(() -> new RuntimeException("Portefeuille non trouve"));
+        
+        return transactionRepository.findAllByWalletOrReceiverWalletOrderByCreatedAtDesc(wallet);
     }
 
     // 1.9 Payer une facture du mois en cours

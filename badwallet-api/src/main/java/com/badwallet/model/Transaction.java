@@ -1,3 +1,5 @@
+// badwallet-api/src/main/java/com/badwallet/model/Transaction.java
+
 package com.badwallet.model;
 
 import jakarta.persistence.*;
@@ -13,28 +15,32 @@ public class Transaction {
     
     @ManyToOne
     @JoinColumn(name = "wallet_id", nullable = false)
-    private Wallet wallet;
+    private Wallet wallet; // Wallet émetteur
+    
+    @ManyToOne
+    @JoinColumn(name = "receiver_wallet_id")
+    private Wallet receiverWallet; // Wallet destinataire
     
     @Enumerated(EnumType.STRING)
     private TransactionType type;
-    
     private BigDecimal amount;
     private BigDecimal fee;
     private String reference;
     private String description;
-    
     @Enumerated(EnumType.STRING)
     private TransactionStatus status;
-    
     @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    // Getters et Setters
+    // ============ GETTERS ET SETTERS ============
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     
     public Wallet getWallet() { return wallet; }
     public void setWallet(Wallet wallet) { this.wallet = wallet; }
+    
+    public Wallet getReceiverWallet() { return receiverWallet; }
+    public void setReceiverWallet(Wallet receiverWallet) { this.receiverWallet = receiverWallet; }
     
     public TransactionType getType() { return type; }
     public void setType(TransactionType type) { this.type = type; }
